@@ -1,40 +1,9 @@
-// Sample Data - Government Civic Portal
-const appData = {
-    issues: [
-        // Your existing issues array remains unchanged
-    ],
-    tenders: [
-        // Your existing tenders array remains unchanged
-    ],
-    companies: [
-        // Your existing companies array remains unchanged
-    ],
-    news: [
-        // Your existing news array remains unchanged
-    ],
-    departments: [
-        // Your existing departments array remains unchanged
-    ]
-};
-
-// Global state
-let currentUserRole = 'Citizen';
-let filteredIssues = [...appData.issues];
-
-// Make functions global for onclick handlers
-window.showSection = showSection;
-window.toggleUserRole = toggleUserRole;
-window.selectIssueType = selectIssueType;
-window.showIssueDetails = showIssueDetails;
-window.updateIssueStatus = updateIssueStatus;
-window.participateInTender = participateInTender;
-window.closeModal = closeModal;
-window.closeNotification = closeNotification;
+const API_BASE = "/api/complaints";
 
 // Fetch all complaints from backend API
 async function fetchComplaints() {
     try {
-        const res = await fetch('/api/complaints');
+        const res = await fetch(API_BASE);
         if (res.ok) {
             const complaints = await res.json();
             appData.issues = complaints;
@@ -53,12 +22,12 @@ async function fetchComplaints() {
     }
 }
 
-// Update a complaint (add budget, tender, status, etc.) via backend API
+// Update complaint with given ID and data
 async function updateComplaint(id, data) {
     try {
-        const res = await fetch(`/api/complaints/${encodeURIComponent(id)}`, {
+        const res = await fetch(`${API_BASE}/${encodeURIComponent(id)}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)
         });
         if (res.ok) {
@@ -75,7 +44,7 @@ async function updateComplaint(id, data) {
     }
 }
 
-// Override your existing updateIssueStatus function to call updateComplaint API
+// Override existing updateIssueStatus to use API update
 function updateIssueStatus(issueId, newStatus) {
     if (currentUserRole === 'Citizen') {
         showNotification('Access denied. Admin privileges required.', 'error');
@@ -92,25 +61,24 @@ function updateIssueStatus(issueId, newStatus) {
         });
 }
 
-// You can call fetchComplaints() when the admin panel loads or the page refreshes to display latest data
-document.addEventListener('DOMContentLoaded', () => {
-    fetchComplaints();
-    initializeApp();
-});
-
-// Keep rest of your existing functions (showSection, toggleUserRole, loadIssuesData, etc.) unchanged
-
-// Example function for updating budget/tender info for an issue (admin only)
+// Assign budget and tender info to complaint (admin only)
 async function assignBudgetAndTender(issueId, budget, tender) {
-    if (currentUserRole !== 'Citizen') {
-        const updateData = { budget, tender };
-        const success = await updateComplaint(issueId, updateData);
-        if (success) {
-            showNotification(`Budget and tender info updated for ${issueId}`, 'success');
-        } else {
-            showNotification('Failed to update budget and tender info.', 'error');
-        }
-    } else {
+    if (currentUserRole === 'Citizen') {
         showNotification('Access denied. Admin privileges required.', 'error');
+        return;
+    }
+    const updateData = { budget, tender };
+    const success = await updateComplaint(issueId, updateData);
+    if (success) {
+        showNotification(`Budget and tender info updated for ${issueId}`, 'success');
+    } else {
+        showNotification('Failed to update budget and tender info.', 'error');
     }
 }
+
+// Initialize app and load complaints on page load
+document.addEventListener('DOMContentLoaded', () => {
+    fetchComplaints().then(() => {
+        initializeApp();
+    });
+});

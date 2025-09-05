@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/main-website/index.html" },
+    { "source": "/admin", "destination": "/government-website/main.html" }
+  ]
+}

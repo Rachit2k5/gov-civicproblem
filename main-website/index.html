@@ -1,89 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CitiReport - Municipal Issue Tracking System</title>
-    <link rel="stylesheet" href="/main-website/style.css">
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CitiReport - Municipal Issue Tracking System</title>
+  <link rel="stylesheet" href="/main-website/style.css" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <!-- Defer your main JS after Chart.js -->
+  <script src="/main-website/app.js" defer></script>
 </head>
 <body>
-    <noscript>
-        <div class="noscript-warning">
-            JavaScript is required for full functionality of this site. Please enable JavaScript.
+  <noscript>
+    <div class="noscript-warning">
+      JavaScript is required for full functionality of this site. Please enable JavaScript.
+    </div>
+  </noscript>
+
+  <div class="app">
+    <!-- Header: navigation tabs -->
+    <header class="header" role="banner">
+      <div class="container">
+        <div class="header-content">
+          <h1 class="header-title">CitiReport</h1>
+          <nav
+            class="nav-tabs"
+            role="tablist"
+            aria-label="Main Navigation"
+          >
+            <button
+              class="nav-tab active"
+              data-tab="dashboard"
+              role="tab"
+              aria-selected="true"
+              aria-controls="dashboard"
+              id="dashboard-tab"
+              tabindex="0"
+            >
+              Dashboard
+            </button>
+            <button
+              class="nav-tab"
+              data-tab="report"
+              role="tab"
+              aria-selected="false"
+              aria-controls="report"
+              id="report-tab"
+              tabindex="-1"
+            >
+              Report Issue
+            </button>
+            <button
+              class="nav-tab"
+              data-tab="map"
+              role="tab"
+              aria-selected="false"
+              aria-controls="map"
+              id="map-tab"
+              tabindex="-1"
+            >
+              Map View
+            </button>
+            <button
+              class="nav-tab"
+              data-tab="admin"
+              role="tab"
+              aria-selected="false"
+              aria-controls="admin"
+              id="admin-tab"
+              tabindex="-1"
+            >
+              Admin Panel
+            </button>
+            <button
+              class="nav-tab"
+              data-tab="analytics"
+              role="tab"
+              aria-selected="false"
+              aria-controls="analytics"
+              id="analytics-tab"
+              tabindex="-1"
+            >
+              Analytics
+            </button>
+          </nav>
         </div>
-    </noscript>
-    <div class="app">
-        <!-- Header Navigation -->
-        <header class="header" role="banner">
-            <div class="container">
-                <div class="header-content">
-                    <h1 class="header-title">CitiReport</h1>
-                    <nav class="nav-tabs" role="tablist" aria-label="Main Navigation">
-                        <button class="nav-tab active" data-tab="dashboard" aria-selected="true" role="tab" tabindex="0">Dashboard</button>
-                        <button class="nav-tab" data-tab="report" aria-selected="false" role="tab" tabindex="0">Report Issue</button>
-                        <button class="nav-tab" data-tab="map" aria-selected="false" role="tab" tabindex="0">Map View</button>
-                        <button class="nav-tab" data-tab="admin" aria-selected="false" role="tab" tabindex="0">Admin Panel</button>
-                        <button class="nav-tab" data-tab="analytics" aria-selected="false" role="tab" tabindex="0">Analytics</button>
-                    </nav>
-                </div>
-            </div>
-        </header>
+      </div>
+    </header>
 
-        <main class="main">
-            <!-- Dashboard Tab -->
-            <section class="tab-content active" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
-                <div class="container">
-                    <!-- ...existing dashboard code... -->
-                </div>
-            </section>
-            <!-- Report Issue Tab -->
-            <section class="tab-content" id="report" role="tabpanel" aria-labelledby="report-tab">
-                <div class="container">
-                    <!-- ...existing report form code... -->
-                </div>
-            </section>
-            <!-- Map View Tab -->
-            <section class="tab-content" id="map" role="tabpanel" aria-labelledby="map-tab">
-                <div class="container">
-                    <!-- ...existing map view code... -->
-                </div>
-            </section>
-            <!-- Admin Panel Tab -->
-            <section class="tab-content" id="admin" role="tabpanel" aria-labelledby="admin-tab">
-                <div class="container">
-                    <!-- ...existing admin panel code... -->
-                </div>
-            </section>
-            <!-- Analytics Tab -->
-            <section class="tab-content" id="analytics" role="tabpanel" aria-labelledby="analytics-tab">
-                <div class="container">
-                    <!-- ...existing analytics code... -->
-                </div>
-            </section>
-        </main>
-
-        <!-- Modal for Issue Details -->
-        <div class="modal hidden" id="issueModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <div class="modal-backdrop" tabindex="-1"></div>
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Issue Details</h3>
-                    <button class="modal-close" id="closeModal" aria-label="Close">&times;</button>
-                </div>
-                <div class="modal-body" id="modalBody"></div>
-                <div class="modal-footer">
-                    <button class="btn btn--secondary" id="closeModalBtn" aria-label="Close Modal">Close</button>
-                    <button class="btn btn--primary" id="updateIssueBtn">Update Status</button>
-                </div>
-            </div>
+    <main class="main">
+      <!-- Dashboard Tab -->
+      <section
+        class="tab-content active"
+        id="dashboard"
+        role="tabpanel"
+        aria-labelledby="dashboard-tab"
+        tabindex="0"
+      >
+        <div class="container">
+          <!-- Place your dashboard content here or dynamically render it -->
         </div>
+      </section>
 
-        <!-- Toast Notifications -->
-        <div class="toast-container" id="toastContainer" role="alert" aria-live="assertive"></div>
+      <!-- Report Issue Tab -->
+      <section
+        class="tab-content"
+        id="report"
+        role="tabpanel"
+        aria-labelledby="report-tab"
+        tabindex="0"
+      >
+        <div class="container">
+          <!-- Place your report issue form here (or render dynamically) -->
+        </div>
+      </section>
+
+      <!-- Map View Tab -->
+      <section
+        class="tab-content"
+        id="map"
+        role="tabpanel"
+        aria-labelledby="map-tab"
+        tabindex="0"
+      >
+        <div class="container">
+          <!-- Map view content injected by JS -->
+        </div>
+      </section>
+
+      <!-- Admin Panel Tab -->
+      <section
+        class="tab-content"
+        id="admin"
+        role="tabpanel"
+        aria-labelledby="admin-tab"
+        tabindex="0"
+      >
+        <div class="container">
+          <!-- Admin panel content injected by JS -->
+        </div>
+      </section>
+
+      <!-- Analytics Tab -->
+      <section
+        class="tab-content"
+        id="analytics"
+        role="tabpanel"
+        aria-labelledby="analytics-tab"
+        tabindex="0"
+      >
+        <div class="container">
+          <!-- Analytics charts and data injected by JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal for Issue Details -->
+    <div
+      class="modal hidden"
+      id="issueModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      tabindex="-1"
+    >
+      <div class="modal-backdrop" tabindex="-1"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Issue Details</h3>
+          <button
+            class="modal-close"
+            id="closeModal"
+            aria-label="Close"
+            type="button"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody" tabindex="0"></div>
+        <div class="modal-footer">
+          <button
+            class="btn btn--secondary"
+            id="closeModalBtn"
+            aria-label="Close Modal"
+            type="button"
+          >
+            Close
+          </button>
+          <button
+            class="btn btn--primary"
+            id="updateIssueBtn"
+            type="button"
+          >
+            Update Status
+          </button>
+        </div>
+      </div>
     </div>
 
-    <script src="/main-website/app.js" defer></script>
+    <!-- Toast Notifications -->
+    <div
+      class="toast-container"
+      id="toastContainer"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    ></div>
+  </div>
 </body>
 </html>

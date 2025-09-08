@@ -64,22 +64,25 @@ document.addEventListener("DOMContentLoaded", () => {
     toast.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
     toast.textContent = message;
     toastContainer.appendChild(toast);
+    // Fade out and remove
     setTimeout(() => {
       toast.classList.add("fade-out");
       toast.addEventListener("transitionend", () => toast.remove());
     }, 3000);
   }
 
+  // Format ISO date strings to readable format
   function formatDate(dateStr) {
     const d = new Date(dateStr);
     return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
 
+  // Unique ID generator for new reports
   function generateUniqueId() {
     return Date.now() + Math.floor(Math.random() * 1000);
   }
 
-  // Accessibility: update aria-selected on tabs
+  // Activate tab with accessibility updates
   function activateTab(selectedTab) {
     tabs.forEach(tab => {
       const isActive = tab === selectedTab;
@@ -93,27 +96,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return target;
   }
 
+  // Tab click and keyboard navigation
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       const target = activateTab(tab);
-      if (target === "dashboard") {
-        loadDashboard();
-      } else if (target === "map") {
-        renderMapMarkers();
-      } else if (target === "admin") {
-        renderAdminTable();
-      } else if (target === "analytics") {
-        renderAnalyticsCharts();
-      }
+      if (target === "dashboard") loadDashboard();
+      else if (target === "map") renderMapMarkers();
+      else if (target === "admin") renderAdminTable();
+      else if (target === "analytics") renderAnalyticsCharts();
     });
-    // Keyboard support for tabs
     tab.addEventListener("keydown", e => {
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         e.preventDefault();
-        const index = Array.prototype.indexOf.call(tabs, e.target);
-        let nextIndex;
-        if (e.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
-        else nextIndex = (index - 1 + tabs.length) % tabs.length;
+        const index = Array.from(tabs).indexOf(e.target);
+        const nextIndex = e.key === "ArrowRight" ? (index + 1) % tabs.length : (index - 1 + tabs.length) % tabs.length;
         tabs[nextIndex].focus();
       }
       if (e.key === "Enter" || e.key === " ") {
@@ -123,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Dashboard load KPI and lists
+  // Dashboard rendering
   function loadDashboard() {
     totalReportsEl.textContent = reports.length.toLocaleString();
     const resolvedCount = reports.filter(r => r.status === "Resolved").length;
@@ -131,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avgResolutionTimeEl.textContent = (5.5 + Math.random() * 0.6).toFixed(1);
     satisfactionEl.textContent = (4 + Math.random() * 0.4).toFixed(1);
 
-    // Recent issues clickable with keyboard access
+    // Recent issues
     const sorted = reports.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
     recentIssuesEl.innerHTML = "";
     sorted.slice(0, 5).forEach(issue => {
@@ -152,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recentIssuesEl.appendChild(div);
     });
 
-    // Department status cards
+    // Department status
     const departmentMap = {};
     reports.forEach(r => {
       const dept = r.department || "Unknown";
@@ -160,17 +156,28 @@ document.addEventListener("DOMContentLoaded", () => {
       departmentMap[dept].total++;
       if (r.status === "Resolved") departmentMap[dept].resolved++;
     });
-
     departmentStatusEl.innerHTML = "";
-    for (const [dept, stats] of Object.entries(departmentMap)) {
+    Object.entries(departmentMap).forEach(([dept, stats]) => {
       const div = document.createElement("div");
       div.className = "department-card";
       div.innerHTML = `<h4>${dept}</h4><div>Total: ${stats.total}</div><div>Resolved: ${stats.resolved}</div>`;
       departmentStatusEl.appendChild(div);
-    }
+    });
   }
 
-  // Report form submit
+  // Map category to department
+  function mapCategoryToDepartment(category) {
+    const map = {
+      Infrastructure: "Public Works",
+      Sanitation: "Sanitation Department",
+      Utilities: "Water & Utilities",
+      "Public Safety": "Electrical Department",
+      Environment: "Parks & Recreation",
+    };
+    return map[category] || "General";
+  }
+
+  // Report form submit handler
   reportForm.addEventListener("submit", e => {
     e.preventDefault();
     const title = reportForm.issueTitle.value.trim();
@@ -199,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
       department: mapCategoryToDepartment(category),
     };
 
-    // Add file names to photos array
     Array.from(photoUploadInput.files).forEach(file => {
       newReport.photos.push(file.name);
     });
@@ -215,18 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderMyReports();
   });
 
-  function mapCategoryToDepartment(category) {
-    const map = {
-      Infrastructure: "Public Works",
-      Sanitation: "Sanitation Department",
-      Utilities: "Water & Utilities",
-      "Public Safety": "Electrical Department",
-      Environment: "Parks & Recreation",
-    };
-    return map[category] || "General";
-  }
-
-  // Use current location
+  // Use current location handler
   useCurrentLocationBtn.addEventListener("click", () => {
     if (!navigator.geolocation) {
       showToast("Geolocation is not supported by your browser", "error");
@@ -264,12 +259,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Render My Reports
   function renderMyReports() {
     if (userReports.length === 0) {
       myReportsEl.textContent = "No reports submitted yet.";
       return;
     }
-    // Use fragment for performance
     const fragment = document.createDocumentFragment();
     [...userReports].reverse().forEach(r => {
       const div = document.createElement("div");
@@ -281,13 +276,13 @@ document.addEventListener("DOMContentLoaded", () => {
     myReportsEl.appendChild(fragment);
   }
 
-  // Map markers with accessible clickable elements
+  // Render Map Markers
   function renderMapMarkers() {
     mapMarkersContainer.innerHTML = "";
     const catFilterVal = mapCategoryFilter.value;
     const statFilterVal = mapStatusFilter.value;
 
-    const filteredIssues = reports.filter(r => 
+    const filteredIssues = reports.filter(r =>
       (catFilterVal === "" || r.category === catFilterVal) &&
       (statFilterVal === "" || r.status === statFilterVal)
     );
@@ -333,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mapCategoryFilter.addEventListener("change", renderMapMarkers);
   mapStatusFilter.addEventListener("change", renderMapMarkers);
 
-  // Admin table rendering with event delegation for view buttons
+  // Render Admin Table
   function renderAdminTable() {
     adminIssuesTableBody.innerHTML = "";
     const deptFilter = adminDepartmentFilter.value;
@@ -368,10 +363,11 @@ document.addEventListener("DOMContentLoaded", () => {
       fragment.appendChild(tr);
     });
     adminIssuesTableBody.appendChild(fragment);
+
     selectAllCheckbox.checked = false;
   }
 
-  // Event delegation for view buttons inside admin table
+  // Event delegation for admin view buttons
   adminIssuesTableBody.addEventListener("click", e => {
     if (e.target.classList.contains("view-btn")) {
       const id = Number(e.target.dataset.id);
@@ -380,15 +376,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Select all checkbox handler
+  // Select all checkbox
   selectAllCheckbox.addEventListener("change", () => {
     const checked = selectAllCheckbox.checked;
-    adminIssuesTableBody.querySelectorAll(".row-checkbox").forEach(cb => cb.checked = checked);
+    adminIssuesTableBody.querySelectorAll(".row-checkbox").forEach(cb => {
+      cb.checked = checked;
+    });
   });
 
   // Bulk assign action
   bulkAssignBtn.addEventListener("click", () => {
-    const selectedIds = Array.from(adminIssuesTableBody.querySelectorAll(".row-checkbox:checked")).map(cb => Number(cb.dataset.id));
+    const selectedIds = Array.from(adminIssuesTableBody.querySelectorAll(".row-checkbox:checked"))
+      .map(cb => Number(cb.dataset.id));
     if (selectedIds.length === 0) {
       showToast("No issues selected for bulk assign.", "error");
       return;
@@ -405,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadDashboard();
   });
 
-  // Export data to CSV
+  // Export CSV
   exportDataBtn.addEventListener("click", () => {
     if (reports.length === 0) {
       showToast("No data to export.", "error");
@@ -435,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
     URL.revokeObjectURL(url);
   });
 
-  // Modal open/close with keyboard support
+  // Modal open
   function openIssueModal(issue) {
     if (!issue) return;
     modalTitle.textContent = `Issue Details - ID: ${issue.id}`;
@@ -457,6 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
     issueModal.focus();
   }
 
+  // Modal close
   function closeModal() {
     issueModal.classList.add("hidden");
     delete issueModal.dataset.issueId;
@@ -465,14 +465,14 @@ document.addEventListener("DOMContentLoaded", () => {
   closeModalBtn.addEventListener("click", closeModal);
   closeModalXBtn.addEventListener("click", closeModal);
 
-  // Close modal on Escape key
+  // Close modal on Escape
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && !issueModal.classList.contains("hidden")) {
       closeModal();
     }
   });
 
-  // Status update cycling
+  // Update status cycle
   updateIssueBtn.addEventListener("click", () => {
     const id = Number(issueModal.dataset.issueId);
     if (!id) return;
@@ -491,7 +491,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Analytics charts (unchanged), deferred with deletion of old charts and re-creation
+  // Analytics charts placeholder (implement as needed)
+  function renderAnalyticsCharts() {
+    // Your chart rendering logic using Chart.js here
+  }
 
   // Initial load
   activateTab(tabs[0]);

@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeModalXBtn = document.getElementById("closeModal");
   const updateIssueBtn = document.getElementById("updateIssueBtn");
   const toastContainer = document.getElementById("toastContainer");
+  const photoPreview = document.getElementById("photoPreview"); // For photo preview
 
   // Helper: Show toast with optional max to avoid stacking
   function showToast(message, type = "info") {
@@ -177,6 +178,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return map[category] || "General";
   }
 
+  // Photo preview on file select
+  photoUploadInput.addEventListener("change", () => {
+    photoPreview.innerHTML = "";
+    Array.from(photoUploadInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.style.maxWidth = "80px";
+        img.style.margin = "5px";
+        photoPreview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
   // Report form submit handler
   reportForm.addEventListener("submit", e => {
     e.preventDefault();
@@ -206,8 +223,12 @@ document.addEventListener("DOMContentLoaded", () => {
       department: mapCategoryToDepartment(category),
     };
 
+    newReport.photos = [];
     Array.from(photoUploadInput.files).forEach(file => {
-      newReport.photos.push(file.name);
+      newReport.photos.push({
+        name: file.name,
+        url: URL.createObjectURL(file),
+      });
     });
 
     reports.push(newReport);
@@ -217,6 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reportForm.reset();
     voiceStatus.textContent = "";
     delete voiceStatus.dataset.voiceNote;
+    photoPreview.innerHTML = ""; // Clear photo preview after submit
 
     renderMyReports();
   });
@@ -269,7 +291,13 @@ document.addEventListener("DOMContentLoaded", () => {
     [...userReports].reverse().forEach(r => {
       const div = document.createElement("div");
       div.className = "my-report-item";
-      div.innerHTML = `<strong>${r.title}</strong> - ${r.status}<br><small>${formatDate(r.date)} at ${r.location}</small>`;
+      let photosHtml = "";
+      if (r.photos && r.photos.length > 0) {
+        photosHtml = "<div class='report-photos'>" +
+          r.photos.map(p => `<img src="${p.url}" alt="${p.name}" style="max-width:60px; margin:2px;">`).join('') +
+          "</div>";
+      }
+      div.innerHTML = `<strong>${r.title}</strong> - ${r.status}<br><small>${formatDate(r.date)} at ${r.location}</small>${photosHtml}`;
       fragment.appendChild(div);
     });
     myReportsEl.innerHTML = "";
@@ -305,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       marker.addEventListener("click", () => openIssueModal(issue));
       marker.addEventListener("keydown", e => {
-        if(e.key === "Enter" || e.key === " ") {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           openIssueModal(issue);
         }
@@ -447,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <p><strong>Date:</strong> ${formatDate(issue.date)}</p>
       <p><strong>Location:</strong> ${issue.location}</p>
       <p><strong>Description:</strong><br>${issue.description || "No description provided."}</p>
-      ${issue.photos.length > 0 ? `<p><strong>Photos:</strong> ${issue.photos.join(", ")}</p>` : ""}
+      ${issue.photos.length > 0 ? `<p><strong>Photos:</strong><br>${issue.photos.map(p => `<img src="${p.url}" alt="${p.name}" style="max-width: 150px; margin: 3px;">`).join("")}</p>` : ""}
       ${issue.voiceNote ? `<p><strong>Voice Note:</strong> Available</p>` : ""}
     `;
 
@@ -494,6 +522,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Analytics charts placeholder (implement as needed)
   function renderAnalyticsCharts() {
     // Your chart rendering logic using Chart.js here
+  }
+
+  // Footer year dynamic update
+  const yearSpan = document.getElementById("year");
+  if (yearSpan) {
+    yearSpan.textContent = new Date().getFullYear();
   }
 
   // Initial load
